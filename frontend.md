@@ -3,51 +3,53 @@
 ```markdown
 # CampusBay Frontend
 
-The frontend client for CampusBay, providing an intuitive and modern user interface for university students to interact with the platform. It is built using the latest features of React and Next.js.
+The Next.js frontend client for CampusBay. It provides a modern, responsive user interface for university students to authenticate, browse the marketplace, and post their own listings.
 
 ## Technology Stack
 
-* **Framework:** Next.js 15 (utilizing the modern App Router)
+* **Framework:** Next.js 15 (App Router)
 * **UI Library:** React 19
 * **Language:** TypeScript
-* **Styling:** Tailwind CSS (configured via PostCSS)
-* **Tooling:** ESLint (for code quality)
+* **Styling:** Tailwind CSS
+* **Tooling:** ESLint, PostCSS
 
 ## How It Works
 
-The frontend leverages Next.js's App Router architecture for seamless routing and optimized rendering:
+The application utilizes Next.js's App Router for efficient, server-side rendered (SSR) and statically generated pages:
 
-1.  **App Router (`src/app`):** Uses file-system-based routing. Folders like `/login` and `/register` directly map to route URLs, with `page.tsx` serving as the UI for that specific route.
-2.  **Components (`src/app/components`):** Reusable React UI components. The authentication logic is abstracted into `login-form.tsx` and `register-form.tsx`, which manage local state (form inputs) and handle API submission events to the Go backend.
-3.  **Styling (`globals.css`):** Global styles are injected here, leveraging Tailwind CSS utility classes to rapidly build responsive and modern interfaces directly within the TSX files without writing custom CSS files.
-4.  **Layout (`layout.tsx`):** Acts as the root shell for the application, defining the foundational HTML structure, importing global styles, and setting up persistent UI elements like navigation bars (if applicable) across different pages.
+1.  **Routing & Pages (`src/app`):** * Public routes include `/login`, `/register`, and the landing page (`/`).
+    * Protected/User routes include `/dashboard` (the main hub for authenticated users) and `/create-listing` (the interface for posting items).
+2.  **Components (`src/app/components`):** Reusable, stateful client components. 
+    * `login-form.tsx` and `register-form.tsx` handle auth API calls.
+    * `create-listing-form.tsx` handles complex state management for text inputs and file (image) selections, submitting them as `FormData` to the Go backend.
+3.  **State & Auth Flow:** Upon successful login, the JWT is stored (typically in `localStorage` or cookies). When navigating to `/dashboard` or submitting via `create-listing-form.tsx`, this token is attached to the request headers to authorize the action.
+4.  **Styling (`globals.css`):** Completely styled using Tailwind CSS utility classes, ensuring a consistent and responsive design across all devices.
 
 ## File Structure
 
 ```text
 campusbay-frontend/
-├── public/                      # Static assets served directly (SVGs, icons)
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── next.svg
-│   ├── vercel.svg
-│   └── window.svg
+├── public/                      # Static assets (SVGs, icons)
 ├── src/
 │   └── app/
-│       ├── components/          # Reusable UI elements
-│       │   ├── login-form.tsx   # Client component for user login
-│       │   └── register-form.tsx# Client component for user registration
-│       ├── login/
+│       ├── components/          # Reusable React components
+│       │   ├── create-listing-form.tsx # Form with image upload handling
+│       │   ├── login-form.tsx   
+│       │   └── register-form.tsx
+│       ├── create-listing/      
+│       │   └── page.tsx         # Route: /create-listing
+│       ├── dashboard/           
+│       │   └── page.tsx         # Route: /dashboard (Main authenticated view)
+│       ├── login/               
 │       │   └── page.tsx         # Route: /login
-│       ├── register/
+│       ├── register/            
 │       │   └── page.tsx         # Route: /register
-│       ├── favicon.ico          # Browser tab icon
-│       ├── globals.css          # Global Tailwind CSS imports
-│       ├── layout.tsx           # Root layout wrapper
+│       ├── favicon.ico          
+│       ├── globals.css          # Global Tailwind styles
+│       ├── layout.tsx           # Root HTML/Body layout
 │       └── page.tsx             # Route: / (Landing Page)
 ├── eslint.config.mjs            # Linter configuration
-├── next.config.ts               # Next.js framework configuration
-├── package.json                 # Node.js dependencies and run scripts
-├── postcss.config.mjs           # CSS processing configuration
-└── tsconfig.json                # TypeScript compiler options
-
+├── next.config.ts               # Next.js configuration
+├── package.json                 # Node.js dependencies
+├── postcss.config.mjs           # CSS processing config
+└── tsconfig.json

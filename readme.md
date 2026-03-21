@@ -1,40 +1,46 @@
---
-
 ### 3. Overall Project README (Root `README.md`)
 
 ```markdown
 # CampusBay
 
-CampusBay is a modern, full-stack platform designed for university students. It serves as a campus-specific marketplace and community hub. This repository contains both the Go-based backend API and the Next.js frontend application.
+CampusBay is a dedicated platform for university students to connect and trade within their campus community. It features a robust user authentication system and a marketplace for creating and browsing listings with image support.
 
 ## System Architecture Overview
 
 CampusBay operates on a decoupled client-server architecture:
 
-* **Frontend (Next.js):** A server-rendered and statically generated web application that provides the user interface. It communicates with the backend purely via RESTful HTTP requests.
-* **Backend (Go/PostgreSQL):** A high-performance REST API that handles all business logic, data persistence, and security.
-* **Authentication Flow:** When a user logs in via the Next.js frontend, the Go backend verifies the credentials against the PostgreSQL database (using Bcrypt) and issues a JSON Web Token (JWT). The frontend stores this token and includes it in the `Authorization` header for subsequent secure API requests.
+* **Frontend (Next.js):** Manages the user interface, form state (including file uploads), and client-side routing. It communicates securely with the backend via RESTful APIs.
+* **Backend (Go/PostgreSQL):** Handles heavy lifting, data persistence, and security. It utilizes middleware to protect sensitive routes (like creating a listing).
+* **Storage:** User-uploaded images for listings are currently stored locally in the backend's `uploads/` directory, with file paths saved to the PostgreSQL database.
+* **Authentication Flow:** 1. User logs in via Next.js.
+  2. Go backend validates credentials and returns a JWT.
+  3. Next.js stores the JWT and attaches it as a Bearer token in the `Authorization` header for protected actions (e.g., accessing the dashboard or uploading a new listing).
 
 ## Technology Stack Summary
 
 | Component | Technologies Used |
 | :--- | :--- |
 | **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS |
-| **Backend** | Go (Golang), Gorilla Mux (Router), JWT |
+| **Backend** | Go (Golang), Standard `net/http` / Router, JWT Auth |
 | **Database** | PostgreSQL |
-| **Security** | Bcrypt (Hashing), stateless JWT sessions |
+| **File Storage**| Local File System (`multipart/form-data` processing) |
 
 ## Project Structure
 
 ```text
 campusbuy/
-├── campusbay-backend/           # The Go API and server logic
+├── campusbay-backend/           # Go API API server
 │   ├── cmd/                     # Server entry points
-│   ├── internal/                # Private application logic (handlers, db)
-│   └── pkg/                     # Shared utilities (JWT)
+│   ├── internal/                # Logic (handlers, models, repository, middleware)
+│   ├── pkg/                     # Utilities (JWT)
+│   └── uploads/                 # Local image storage
 │
-├── campusbay-frontend/          # The Next.js web application
-│   ├── public/                  # Static web assets
-│   └── src/app/                 # Next.js App Router pages and components
+├── campusbay-frontend/          # Next.js Web Application
+│   ├── public/                  # Static assets
+│   └── src/app/                 # Next.js Pages (Dashboard, Auth, Create Listing)
 │
-└── README.md
+├── backend.md                   # Dev notes regarding backend setup
+├── frontend.md                  # Dev notes regarding frontend setup
+├── database.md                  # DB schema/configuration notes
+├── phases.md                    # Project roadmap and planning
+└── readme.md                    # Root documentation (this file)
