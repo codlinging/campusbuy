@@ -23,3 +23,15 @@ INSERT INTO universities (name, domain) VALUES
     ('University of California, Berkeley', 'berkeley.edu'),
     ('University of Texas at Austin', 'utexas.edu')
 ON CONFLICT (domain) DO NOTHING;
+CREATE TABLE listings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    seller_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    starting_price DECIMAL(10, 2) NOT NULL,
+    current_price DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'active', -- Can be 'active', 'sold', or 'expired'
+    image_url VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);

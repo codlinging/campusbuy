@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"campusbay-backend/internal/middleware"
 	"campusbay-backend/internal/repository"
 
 	"campusbay-backend/internal/handlers"
@@ -22,7 +23,7 @@ func main() {
 	}
 
 	router := gin.Default()
-
+	router.Static("/uploads", "./uploads")
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
@@ -40,6 +41,13 @@ func main() {
 	{
 		authRoutes.POST("/register", handlers.RegisterUser)
 		authRoutes.POST("/login", handlers.LoginUser) // Uncomment this
+	}
+	apiRoutes := router.Group("/api/v1")
+	apiRoutes.Use(middleware.RequireAuth())
+	{
+		// We will build these handlers next!
+		apiRoutes.POST("/listings", handlers.CreateListing)
+		apiRoutes.GET("/listings", handlers.GetListings)
 	}
 	log.Println("Starting CampusBay backend on port 8080...")
 	if err := router.Run(":8081"); err != nil {

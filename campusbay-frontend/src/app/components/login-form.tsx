@@ -43,9 +43,8 @@ export default function LoginForm() {
       
       // Redirect to the marketplace dashboard after a brief delay
       setTimeout(() => {
-        router.push("/"); // Or wherever your main dashboard will be
+        router.push("/dashboard"); // <-- Update this line!
       }, 1000);
-
     } catch (error: any) {
       setStatus({ type: "error", message: error.message });
     }
