@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
+	"net/http"
 
 	"campusbay-backend/internal/cache"
+	"campusbay-backend/internal/middleware"
+	"campusbay-backend/internal/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,29 +21,45 @@ type ChatMessage struct {
 }
 
 func ServeChatWS(c *gin.Context) {
-	// A unique room for this specific conversation (e.g., listing_123_buyer_456)
 	roomID := c.Param("room_id")
 
+	// 1. SECURITY: Read the JWT Cookie
+	tokenString, err := c.Cookie("campusbay_jwt")
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	claims := &middleware.Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return middleware.JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	realUserID := claims.UserID.String()
+
+	// 2. Upgrade Connection
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Println("Chat upgrade failed:", err)
 		return
 	}
 	defer conn.Close()
 
-	// Subscribe to this specific chat room via Redis Pub/Sub
 	channelName := "chat:" + roomID
 	pubsub := cache.RDB.Subscribe(cache.Ctx, channelName)
 	defer pubsub.Close()
 
-	// Listen for incoming messages from Redis and send to the frontend UI
+	// Listen for Redis broadcasts
 	go func() {
 		for msg := range pubsub.Channel() {
 			conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
 		}
 	}()
 
-	// Listen for new messages typed by the user
+	// Listen for incoming messages
 	for {
 		_, payload, err := conn.ReadMessage()
 		if err != nil {
@@ -49,9 +68,13 @@ func ServeChatWS(c *gin.Context) {
 
 		var chatMsg ChatMessage
 		if err := json.Unmarshal(payload, &chatMsg); err == nil {
-			// TODO: Save chatMsg to PostgreSQL `messages` table here!
+			// OVERRIDE: Force the sender ID to be the real logged-in user
+			chatMsg.SenderID = realUserID
 
-			// Broadcast the message to the other person in the room instantly
+			// Save to Postgres
+			repository.SaveChatMessage(c.Request.Context(), chatMsg.ListingID, chatMsg.SenderID, chatMsg.ReceiverID, chatMsg.Content)
+
+			// Broadcast
 			msgJSON, _ := json.Marshal(chatMsg)
 			cache.RDB.Publish(cache.Ctx, channelName, msgJSON)
 		}

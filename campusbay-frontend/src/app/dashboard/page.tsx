@@ -2,22 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import WalletWidget from "@/components/wallet-widgets"; // <-- Fixed typo here!
 
 interface Listing {
   id: string; title: string; description: string; current_price: number; image_url?: string;
 }
 
 export default function DashboardPage() {
-  const [allListings, setAllListings] = useState<Listing[]>([]); // Holds everything from DB
-  const [displayedListings, setDisplayedListings] = useState<Listing[]>([]); // Holds filtered items
+  const [allListings, setAllListings] = useState<Listing[]>([]); 
+  const [displayedListings, setDisplayedListings] = useState<Listing[]>([]); 
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Initial load from PostgreSQL 
   useEffect(() => {
     const fetchInitialListings = async () => {
       try {
-        const response = await fetch("http://localhost:8081/api/v1/listings", { credentials: "include" });
+        const response = await fetch(`http://${window.location.hostname}:8081/api/v1/listings`, { credentials: "include" });
         if (response.ok) {
           const data = await response.json();
           setAllListings(data);
@@ -32,7 +32,6 @@ export default function DashboardPage() {
     fetchInitialListings();
   }, []);
 
-  // Simple client-side search filtering
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setDisplayedListings(allListings);
@@ -68,12 +67,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <WalletWidget />
+
             <Link href="/create-listing" className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors">
               + Sell Item
             </Link>
-            <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden cursor-pointer">
-              <span className="text-slate-600 font-medium">JD</span>
-            </div>
+            
+            {/* <-- Cleaned up the double avatar here! --> */}
+            <Link href="/profile">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all">
+                <span className="text-indigo-700 font-bold">JD</span>
+              </div>
+            </Link>
           </div>
         </div>
       </nav>
@@ -93,6 +98,7 @@ export default function DashboardPage() {
             {displayedListings.map((item) => (
               <Link href={`/auction/${item.id}`} key={item.id}>
                 <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer h-full">
+                  
                   {/* Image Section */}
                   <div className="h-48 w-full bg-slate-100 relative overflow-hidden">
                     {item.image_url ? (
@@ -127,5 +133,5 @@ export default function DashboardPage() {
         )}
       </main>
     </div>
-  
-)}
+  );
+}

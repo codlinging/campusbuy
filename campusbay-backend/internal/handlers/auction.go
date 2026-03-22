@@ -6,30 +6,53 @@ import (
 	"net/http"
 
 	"campusbay-backend/internal/cache"
+	"campusbay-backend/internal/middleware"
+	"campusbay-backend/internal/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 )
 
-// Configure the Upgrader to allow connections from your Next.js frontend
+// Updated to allow connections from your Phone (Expo) and Laptop (Next.js)
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		origin := r.Header.Get("Origin")
-		return origin == "http://localhost:3000"
+		return true // Allow all origins for local testing
 	},
 }
 
-// BidMessage defines the structure of the JSON payload sent over the WebSocket
 type BidMessage struct {
 	ListingID string  `json:"listing_id"`
-	UserID    string  `json:"user_id"` // In production, pull this securely from the JWT context
+	UserID    string  `json:"user_id"`
 	Amount    float64 `json:"amount"`
 }
 
 func ServeAuctionWS(c *gin.Context) {
 	listingID := c.Param("id")
 
-	// 1. Upgrade the HTTP connection to a WebSocket
+	// 1. SECURITY: Read the JWT Cookie before upgrading the connection
+	tokenString, err := c.Cookie("campusbay_jwt")
+	if err != nil {
+		log.Println("WS Connection rejected: No JWT cookie")
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// 2. Parse the JWT to get the verified User ID
+	claims := &middleware.Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return middleware.JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		log.Println("WS Connection rejected: Invalid JWT")
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	realUserID := claims.UserID.String()
+
+	// 3. Upgrade to WebSocket
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("Failed to upgrade connection: %v\n", err)
@@ -37,45 +60,43 @@ func ServeAuctionWS(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	log.Printf("Client connected to auction: %s\n", listingID)
-
-	// 2. Subscribe this specific connection to the Redis Pub/Sub channel for this listing
 	channelName := "auction:" + listingID
 	pubsub := cache.RDB.Subscribe(cache.Ctx, channelName)
 	defer pubsub.Close()
 
-	// 3. Goroutine to listen for messages from Redis and push them to the frontend
+	// Listen for Redis broadcasts
 	go func() {
-		ch := pubsub.Channel()
-		for msg := range ch {
-			// When Redis broadcasts a new bid, send it down the WebSocket to the browser
-			if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload)); err != nil {
-				log.Println("Error writing to websocket:", err)
-				break
-			}
+		for msg := range pubsub.Channel() {
+			conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
 		}
 	}()
 
-	// 4. Main loop to listen for incoming bids from this specific user
+	// Listen for incoming bids
 	for {
 		_, payload, err := conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket error: %v\n", err)
-			}
 			break
 		}
 
 		var bid BidMessage
 		if err := json.Unmarshal(payload, &bid); err != nil {
-			log.Printf("Invalid bid payload: %v\n", err)
 			continue
 		}
 
-		// TODO: Here is where we will add the logic to validate the bid amount
-		// against PostgreSQL and the current highest bid cached in Redis.
+		// SECURITY OVERRIDE: Ignore frontend ID, use the verified JWT ID
+		bid.UserID = realUserID
 
-		// For now, if valid, broadcast the new bid to ALL users via Redis Pub/Sub
+		// 4. Execute the Financial Transaction
+		if err := repository.PlaceBid(c.Request.Context(), listingID, realUserID, bid.Amount); err != nil {
+			log.Printf("Bid rejected for user %s: %v\n", realUserID, err)
+
+			// Optional: Send an error message back to the user
+			errorMsg, _ := json.Marshal(map[string]string{"error": err.Error()})
+			conn.WriteMessage(websocket.TextMessage, errorMsg)
+			continue // Stop processing this bid
+		}
+
+		// 5. If successful, broadcast the new bid to ALL connected users
 		bidJSON, _ := json.Marshal(bid)
 		cache.RDB.Publish(cache.Ctx, channelName, bidJSON)
 	}

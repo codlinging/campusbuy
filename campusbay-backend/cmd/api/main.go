@@ -53,6 +53,8 @@ func main() {
 		apiRoutes.GET("/auctions/:id/ws", handlers.ServeAuctionWS)
 		apiRoutes.GET("/listings/:id", handlers.GetListing) // <-- Add this line!
 		apiRoutes.GET("/chat/:room_id/ws", handlers.ServeChatWS)
+		apiRoutes.GET("/wallet", handlers.GetWallet)
+		apiRoutes.GET("/profile", handlers.GetProfile)
 	}
 	log.Println("Starting CampusBay backend on port 8080...")
 	if err := router.Run(":8081"); err != nil {

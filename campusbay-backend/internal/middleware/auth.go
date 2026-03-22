@@ -9,7 +9,7 @@ import (
 )
 
 // Ensure this matches the key in pkg/utils/jwt.go
-var jwtKey = []byte("super_secret_campusbay_key_change_me_in_prod")
+var JwtKey = []byte("super_secret_campusbay_key_change_me_in_prod")
 
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
@@ -28,7 +28,7 @@ func RequireAuth() gin.HandlerFunc {
 		// 2. Parse and validate the token
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return JwtKey, nil
 		})
 
 		if err != nil || !token.Valid {

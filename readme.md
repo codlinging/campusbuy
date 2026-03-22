@@ -3,18 +3,16 @@
 ```markdown
 # CampusBay
 
-CampusBay is a dedicated platform for university students to connect and trade within their campus community. It features a robust user authentication system and a marketplace for creating and browsing listings with image support.
+CampusBay is a dedicated platform for university students to connect, trade, and communicate within their campus community. It features user authentication, a marketplace with image support, live auctions, and real-time messaging.
 
 ## System Architecture Overview
 
 CampusBay operates on a decoupled client-server architecture:
 
-* **Frontend (Next.js):** Manages the user interface, form state (including file uploads), and client-side routing. It communicates securely with the backend via RESTful APIs.
-* **Backend (Go/PostgreSQL):** Handles heavy lifting, data persistence, and security. It utilizes middleware to protect sensitive routes (like creating a listing).
-* **Storage:** User-uploaded images for listings are currently stored locally in the backend's `uploads/` directory, with file paths saved to the PostgreSQL database.
-* **Authentication Flow:** 1. User logs in via Next.js.
-  2. Go backend validates credentials and returns a JWT.
-  3. Next.js stores the JWT and attaches it as a Bearer token in the `Authorization` header for protected actions (e.g., accessing the dashboard or uploading a new listing).
+* **Frontend (Next.js):** Manages the UI, client-side routing, file uploads, and dynamic views for chat and auctions. It communicates securely with the backend via RESTful APIs and likely WebSockets/Polling for real-time features.
+* **Backend (Go/PostgreSQL/Redis):** Handles business logic, data persistence, and security. It utilizes PostgreSQL for primary data storage and Redis for caching and facilitating real-time interactions (like chat and bidding).
+* **Storage:** User-uploaded images are stored locally in the backend's `uploads/` directory, referenced by file paths in the database.
+* **Authentication Flow:** Next.js client sends credentials -> Go backend validates and returns JWT -> Next.js uses JWT as a Bearer token for all protected API calls.
 
 ## Technology Stack Summary
 
@@ -22,25 +20,26 @@ CampusBay operates on a decoupled client-server architecture:
 | :--- | :--- |
 | **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS |
 | **Backend** | Go (Golang), Standard `net/http` / Router, JWT Auth |
-| **Database** | PostgreSQL |
-| **File Storage**| Local File System (`multipart/form-data` processing) |
+| **Databases** | PostgreSQL (Primary Data), Redis (Cache/Real-time) |
+| **File Storage**| Local File System (`multipart/form-data`) |
 
 ## Project Structure
 
 ```text
 campusbuy/
-├── campusbay-backend/           # Go API API server
+├── campusbay-backend/           # Go API server
 │   ├── cmd/                     # Server entry points
-│   ├── internal/                # Logic (handlers, models, repository, middleware)
+│   ├── internal/                # Logic (handlers, models, cache, db)
 │   ├── pkg/                     # Utilities (JWT)
 │   └── uploads/                 # Local image storage
 │
 ├── campusbay-frontend/          # Next.js Web Application
 │   ├── public/                  # Static assets
-│   └── src/app/                 # Next.js Pages (Dashboard, Auth, Create Listing)
+│   └── src/app/                 # Next.js Pages (Dashboard, Auth, Auction, Chat)
 │
-├── backend.md                   # Dev notes regarding backend setup
-├── frontend.md                  # Dev notes regarding frontend setup
-├── database.md                  # DB schema/configuration notes
+├── backend.md                   # Dev notes: backend setup
+├── commands.md                  # Useful CLI commands for the project
+├── database.md                  # Dev notes: DB schema/configuration
+├── frontend.md                  # Dev notes: frontend setup
 ├── phases.md                    # Project roadmap and planning
 └── readme.md                    # Root documentation (this file)

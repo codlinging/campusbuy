@@ -43,3 +43,33 @@ CREATE TABLE messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+-- The Wallet table holds the user's available and locked balances
+CREATE TABLE wallets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    balance DECIMAL(10, 2) DEFAULT 0.00,        -- Total money they can spend
+    locked_funds DECIMAL(10, 2) DEFAULT 0.00,   -- Money tied up in active bids
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- When a user registers, automatically create a wallet for them with $100 test money
+CREATE OR REPLACE FUNCTION create_wallet_for_new_user() 
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO wallets (user_id, balance) VALUES (NEW.id, 100.00);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_create_wallet
+AFTER INSERT ON users
+FOR EACH ROW EXECUTE FUNCTION create_wallet_for_new_user();
+
+-- We also need a table to record bids permanently, not just in Redis
+CREATE TABLE bids (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    listing_id UUID REFERENCES listings(id) ON DELETE CASCADE,
+    bidder_id UUID REFERENCES users(id),
+    amount DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

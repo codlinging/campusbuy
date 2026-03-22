@@ -3,7 +3,7 @@
 ```markdown
 # CampusBay Frontend
 
-The Next.js frontend client for CampusBay. It provides a modern, responsive user interface for university students to authenticate, browse the marketplace, and post their own listings.
+The Next.js frontend client for CampusBay. It provides a modern, responsive user interface for university students to authenticate, browse the marketplace, participate in auctions, and chat with other students.
 
 ## Technology Stack
 
@@ -15,15 +15,15 @@ The Next.js frontend client for CampusBay. It provides a modern, responsive user
 
 ## How It Works
 
-The application utilizes Next.js's App Router for efficient, server-side rendered (SSR) and statically generated pages:
+The application utilizes Next.js's App Router for efficient routing, rendering, and state management:
 
-1.  **Routing & Pages (`src/app`):** * Public routes include `/login`, `/register`, and the landing page (`/`).
-    * Protected/User routes include `/dashboard` (the main hub for authenticated users) and `/create-listing` (the interface for posting items).
-2.  **Components (`src/app/components`):** Reusable, stateful client components. 
-    * `login-form.tsx` and `register-form.tsx` handle auth API calls.
-    * `create-listing-form.tsx` handles complex state management for text inputs and file (image) selections, submitting them as `FormData` to the Go backend.
-3.  **State & Auth Flow:** Upon successful login, the JWT is stored (typically in `localStorage` or cookies). When navigating to `/dashboard` or submitting via `create-listing-form.tsx`, this token is attached to the request headers to authorize the action.
-4.  **Styling (`globals.css`):** Completely styled using Tailwind CSS utility classes, ensuring a consistent and responsive design across all devices.
+1.  **Routing & Pages (`src/app`):**
+    * **Public routes:** `/login`, `/register`, and the landing page (`/`).
+    * **Protected routes:** `/dashboard` (main hub) and `/create-listing` (posting items).
+    * **Dynamic routes:** `/auction/[id]` for individual live auctions and `/chat/[roomId]` for private or group messaging.
+2.  **Components (`src/app/components`):** Reusable, stateful client components handling API submissions and local state (`login-form.tsx`, `register-form.tsx`, `create-listing-form.tsx`).
+3.  **State & Auth Flow:** Upon login, the JWT is stored client-side. When navigating to protected routes or submitting data, this token is attached to the request headers to authorize the action.
+4.  **Styling (`globals.css`):** Styled entirely using Tailwind CSS utility classes.
 
 ## File Structure
 
@@ -32,14 +32,20 @@ campusbay-frontend/
 ├── public/                      # Static assets (SVGs, icons)
 ├── src/
 │   └── app/
-│       ├── components/          # Reusable React components
-│       │   ├── create-listing-form.tsx # Form with image upload handling
+│       ├── auction/
+│       │   └── [id]/
+│       │       └── page.tsx     # Dynamic Route: Individual auction view
+│       ├── chat/
+│       │   └── [roomId]/
+│       │       └── page.tsx     # Dynamic Route: Chat room view
+│       ├── components/          
+│       │   ├── create-listing-form.tsx 
 │       │   ├── login-form.tsx   
 │       │   └── register-form.tsx
 │       ├── create-listing/      
 │       │   └── page.tsx         # Route: /create-listing
 │       ├── dashboard/           
-│       │   └── page.tsx         # Route: /dashboard (Main authenticated view)
+│       │   └── page.tsx         # Route: /dashboard 
 │       ├── login/               
 │       │   └── page.tsx         # Route: /login
 │       ├── register/            
@@ -48,8 +54,8 @@ campusbay-frontend/
 │       ├── globals.css          # Global Tailwind styles
 │       ├── layout.tsx           # Root HTML/Body layout
 │       └── page.tsx             # Route: / (Landing Page)
-├── eslint.config.mjs            # Linter configuration
-├── next.config.ts               # Next.js configuration
-├── package.json                 # Node.js dependencies
-├── postcss.config.mjs           # CSS processing config
+├── eslint.config.mjs            
+├── next.config.ts               
+├── package.json                 
+├── postcss.config.mjs           
 └── tsconfig.json
