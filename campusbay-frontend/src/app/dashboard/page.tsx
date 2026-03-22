@@ -91,40 +91,41 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {displayedListings.map((item) => (
-              <div key={item.id} className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer">
-                
-                {/* Image Section */}
-                <div className="h-48 w-full bg-slate-100 relative overflow-hidden">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">No Image</div>
-                  )}
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-indigo-700 shadow-sm">
-                    Live Auction
-                  </div>
-                </div>
-                
-                {/* Content Section */}
-                <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="font-semibold text-slate-900 line-clamp-1 mb-1">{item.title}</h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 mb-4 flex-grow">{item.description}</p>
-                  
-                  <div className="flex justify-between items-end pt-3 border-t border-slate-100">
-                    <div>
-                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-0.5">Current Bid</p>
-                      <p className="text-lg font-bold text-slate-900">${item.current_price.toFixed(2)}</p>
+              <Link href={`/auction/${item.id}`} key={item.id}>
+                <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer h-full">
+                  {/* Image Section */}
+                  <div className="h-48 w-full bg-slate-100 relative overflow-hidden">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-slate-400">No Image</div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-indigo-700 shadow-sm">
+                      Live Auction
                     </div>
-                    <button className="bg-slate-50 text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors">
-                      Bid
-                    </button>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="font-semibold text-slate-900 line-clamp-1 mb-1">{item.title}</h3>
+                    <p className="text-xs text-slate-500 line-clamp-2 mb-4 flex-grow">{item.description}</p>
+
+                    <div className="flex justify-between items-end pt-3 border-t border-slate-100">
+                      <div>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-0.5">Current Bid</p>
+                        <p className="text-lg font-bold text-slate-900">${item.current_price.toFixed(2)}</p>
+                      </div>
+                      <button className="bg-slate-50 text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors">
+                        Bid
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
       </main>
     </div>
-  );
-}
+  
+)}

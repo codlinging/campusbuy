@@ -85,7 +85,17 @@ func CreateListing(c *gin.Context) {
 		"listing": listing,
 	})
 }
+func GetListing(c *gin.Context) {
+	id := c.Param("id")
 
+	listing, err := repository.GetListingByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listing)
+}
 func GetListings(c *gin.Context) {
 	listings, err := repository.GetAllActiveListings(c.Request.Context())
 	if err != nil {

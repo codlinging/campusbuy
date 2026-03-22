@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"campusbay-backend/internal/cache"
 	"campusbay-backend/internal/middleware"
 	"campusbay-backend/internal/repository"
 
@@ -23,6 +24,7 @@ func main() {
 	}
 
 	router := gin.Default()
+	cache.InitRedis()
 	router.Static("/uploads", "./uploads")
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
@@ -48,6 +50,9 @@ func main() {
 		// We will build these handlers next!
 		apiRoutes.POST("/listings", handlers.CreateListing)
 		apiRoutes.GET("/listings", handlers.GetListings)
+		apiRoutes.GET("/auctions/:id/ws", handlers.ServeAuctionWS)
+		apiRoutes.GET("/listings/:id", handlers.GetListing) // <-- Add this line!
+		apiRoutes.GET("/chat/:room_id/ws", handlers.ServeChatWS)
 	}
 	log.Println("Starting CampusBay backend on port 8080...")
 	if err := router.Run(":8081"); err != nil {

@@ -28,6 +28,24 @@ func CreateListing(ctx context.Context, listing *models.Listing) error {
 	return err
 }
 
+// GetListingByID fetches a single item for the auction page
+func GetListingByID(ctx context.Context, id string) (*models.Listing, error) {
+	var l models.Listing
+	query := `
+		SELECT id, seller_id, title, description, starting_price, current_price, status, image_url, created_at, expires_at 
+		FROM listings 
+		WHERE id = $1
+	`
+
+	err := DB.QueryRow(ctx, query, id).Scan(
+		&l.ID, &l.SellerID, &l.Title, &l.Description,
+		&l.StartingPrice, &l.CurrentPrice, &l.Status,
+		&l.ImageURL, &l.CreatedAt, &l.ExpiresAt,
+	)
+
+	return &l, err
+}
+
 // GetAllActiveListings fetches items for the dashboard
 func GetAllActiveListings(ctx context.Context) ([]models.Listing, error) {
 	query := `
