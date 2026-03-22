@@ -1,16 +1,18 @@
+---
+
 ### 3. Overall Project README (Root `README.md`)
 
 ```markdown
 # CampusBay
 
-CampusBay is a dedicated platform for university students to connect, trade, and communicate within their campus community. It features user authentication, a marketplace with image support, live auctions, and real-time messaging.
+CampusBay is a comprehensive digital platform designed for university students to connect, trade, and communicate within their campus community. It features user authentication, a marketplace with image support, live auctions, real-time messaging, user profiles, and an integrated digital wallet system.
 
 ## System Architecture Overview
 
 CampusBay operates on a decoupled client-server architecture:
 
-* **Frontend (Next.js):** Manages the UI, client-side routing, file uploads, and dynamic views for chat and auctions. It communicates securely with the backend via RESTful APIs and likely WebSockets/Polling for real-time features.
-* **Backend (Go/PostgreSQL/Redis):** Handles business logic, data persistence, and security. It utilizes PostgreSQL for primary data storage and Redis for caching and facilitating real-time interactions (like chat and bidding).
+* **Frontend (Next.js):** Manages the UI, client-side routing, file uploads, dynamic views for chat/auctions, and wallet interactions. It communicates securely with the backend via RESTful APIs and utilizes real-time protocols for live features.
+* **Backend (Go/PostgreSQL/Redis):** Handles business logic, data persistence, and security. It utilizes PostgreSQL for primary data storage (users, listings, wallet balances) and Redis for caching and facilitating real-time interactions (chat and bidding).
 * **Storage:** User-uploaded images are stored locally in the backend's `uploads/` directory, referenced by file paths in the database.
 * **Authentication Flow:** Next.js client sends credentials -> Go backend validates and returns JWT -> Next.js uses JWT as a Bearer token for all protected API calls.
 
@@ -35,11 +37,12 @@ campusbuy/
 │
 ├── campusbay-frontend/          # Next.js Web Application
 │   ├── public/                  # Static assets
-│   └── src/app/                 # Next.js Pages (Dashboard, Auth, Auction, Chat)
+│   └── src/app/                 # Next.js Pages (Dashboard, Auth, Auction, Chat, Profile)
 │
 ├── backend.md                   # Dev notes: backend setup
 ├── commands.md                  # Useful CLI commands for the project
 ├── database.md                  # Dev notes: DB schema/configuration
 ├── frontend.md                  # Dev notes: frontend setup
 ├── phases.md                    # Project roadmap and planning
+├── firstcommit.md               # Git tracking details
 └── readme.md                    # Root documentation (this file)
