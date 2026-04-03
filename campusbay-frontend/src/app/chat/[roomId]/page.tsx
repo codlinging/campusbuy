@@ -24,7 +24,15 @@ export default function ChatRoomPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Hardcoded for testing. In Phase 5, this comes from your JWT!
-  const myUserId = "test-user-id"; 
+const [myUserId, setMyUserId] = useState<string>("");
+
+  useEffect(() => {
+    // Fetch real ID from wallet securely
+    fetch(`http://${window.location.hostname}:8081/api/v1/wallet`, { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setMyUserId(data.user_id))
+      .catch(console.error);
+  }, []);
 
   // Auto-scroll to the bottom when a new message arrives
   useEffect(() => {

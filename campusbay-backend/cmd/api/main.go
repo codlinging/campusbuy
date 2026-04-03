@@ -55,6 +55,12 @@ func main() {
 		apiRoutes.GET("/chat/:room_id/ws", handlers.ServeChatWS)
 		apiRoutes.GET("/wallet", handlers.GetWallet)
 		apiRoutes.GET("/profile", handlers.GetProfile)
+		apiRoutes.POST("/wallet/topup", handlers.TopUpWallet)
+		apiRoutes.DELETE("/listings/:id", handlers.DeleteListing)
+		apiRoutes.GET("/admin/stats", handlers.GetMarketplaceStats)
+		apiRoutes.GET("/admin/users", handlers.GetAllUsers)
+		apiRoutes.DELETE("/admin/users/:id", handlers.AdminDeleteUser)
+		apiRoutes.DELETE("/admin/listings/:id", handlers.AdminDeleteListing)
 	}
 	log.Println("Starting CampusBay backend on port 8080...")
 	if err := router.Run(":8081"); err != nil {

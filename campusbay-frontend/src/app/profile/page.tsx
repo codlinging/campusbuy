@@ -117,9 +117,24 @@ export default function ProfilePage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {myListings.map((item) => (
-                    <Link href={`/auction/${item.id}`} key={item.id}>
-                      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full">
-                        <img src={item.image_url || "/placeholder.jpg"} alt={item.title} className="w-full h-40 object-cover bg-slate-100" />
+                    <div key={item.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full relative">
+                      
+                      {/* NEW DELETE BUTTON */}
+                      <button 
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if(confirm("Are you sure you want to delete this listing?")) {
+                            await fetch(`http://${window.location.hostname}:8081/api/v1/listings/${item.id}`, { method: 'DELETE', credentials: "include" });
+                            window.location.reload();
+                          }
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full font-bold shadow-md z-10"
+                      >
+                        X
+                      </button>
+
+                      <Link href={`/auction/${item.id}`} className="flex flex-col h-full">
+                        <img src={item.image_url || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"} alt={item.title} className="w-full h-40 object-cover bg-slate-100" />
                         <div className="p-4 flex-grow flex flex-col justify-between">
                           <h3 className="font-bold text-slate-900 line-clamp-1 mb-2">{item.title}</h3>
                           <div className="flex justify-between items-center">
@@ -129,8 +144,8 @@ export default function ProfilePage() {
                             </span>
                           </div>
                         </div>
-                      </div>
-                    </Link>
+                      </Link>
+                    </div>
                   ))}
                 </div>
               )}

@@ -110,3 +110,23 @@ func GetListings(c *gin.Context) {
 
 	c.JSON(http.StatusOK, listings)
 }
+func DeleteListing(c *gin.Context) {
+	id := c.Param("id")
+	userIDValue, _ := c.Get("user_id")
+	sellerID := userIDValue.(uuid.UUID).String()
+
+	query := "DELETE FROM listings WHERE id = $1 AND seller_id = $2"
+	res, err := repository.DB.Exec(c.Request.Context(), query, id, sellerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete"})
+		return
+	}
+
+	rowsAffected := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized or item not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Deleted successfully"})
+}

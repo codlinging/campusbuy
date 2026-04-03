@@ -5,7 +5,13 @@ import Link from "next/link";
 import WalletWidget from "@/components/wallet-widgets"; // <-- Fixed typo here!
 
 interface Listing {
-  id: string; title: string; description: string; current_price: number; image_url?: string;
+  id: string; 
+  title: string; 
+  description: string; 
+  current_price: number; 
+  image_url?: string;
+  created_at: string; 
+  expires_at: string;
 }
 
 export default function DashboardPage() {
@@ -73,7 +79,6 @@ export default function DashboardPage() {
               + Sell Item
             </Link>
             
-            {/* <-- Cleaned up the double avatar here! --> */}
             <Link href="/profile">
               <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all">
                 <span className="text-indigo-700 font-bold">JD</span>
@@ -106,8 +111,15 @@ export default function DashboardPage() {
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-slate-400">No Image</div>
                     )}
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-indigo-700 shadow-sm">
-                      Live Auction
+                    <div className={`absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold shadow-sm ${
+                      (new Date(item.expires_at).getTime() - new Date(item.created_at).getTime()) / (1000 * 60 * 60) >= 167 
+                      ? "text-slate-700" 
+                      : "text-indigo-700"
+                    }`}>
+                      {(new Date(item.expires_at).getTime() - new Date(item.created_at).getTime()) / (1000 * 60 * 60) >= 167 
+                        ? "Fixed Price" 
+                        : "Live Auction"
+                      }
                     </div>
                   </div>
 
