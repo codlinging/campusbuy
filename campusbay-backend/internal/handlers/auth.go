@@ -112,12 +112,29 @@ func LoginUser(c *gin.Context) {
 	// Note: Set 'secure' to true in production when using HTTPS
 	c.SetCookie("campusbay_jwt", token, 86400, "/", "localhost", false, true)
 
+	// NEW: Fetch the user's role directly from the database
+	var role string
+	err = repository.DB.QueryRow(c.Request.Context(), "SELECT role FROM users WHERE id = $1", user.ID).Scan(&role)
+	if err != nil {
+		role = "user" // Default fallback
+	}
+
+	// Send the role back to the React frontend!
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user": gin.H{
 			"id":         user.ID,
 			"first_name": user.FirstName,
 			"last_name":  user.LastName,
+			"role":       role, // <-- Added this line!
 		},
+	})
+}
+func LogoutUser(c *gin.Context) {
+	// Overwrite the cookie with a blank value and set MaxAge to -1 to delete it
+	c.SetCookie("campusbay_jwt", "", -1, "/", "localhost", false, true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logged out successfully",
 	})
 }

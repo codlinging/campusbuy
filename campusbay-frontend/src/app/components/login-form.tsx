@@ -41,9 +41,13 @@ export default function LoginForm() {
 
       setStatus({ type: "success", message: "Welcome back!" });
       
-      // Redirect to the marketplace dashboard after a brief delay
+      // NEW: Intelligent Redirection based on Role!
       setTimeout(() => {
-        router.push("/dashboard"); // <-- Update this line!
+        if (data.user.role === "admin") {
+          router.push("/admin"); // Take the boss to the command center
+        } else {
+          router.push("/dashboard"); // Take students to the marketplace
+        }
       }, 1000);
     } catch (error: any) {
       setStatus({ type: "error", message: error.message });

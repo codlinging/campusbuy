@@ -61,6 +61,7 @@ func main() {
 		apiRoutes.GET("/admin/users", handlers.GetAllUsers)
 		apiRoutes.DELETE("/admin/users/:id", handlers.AdminDeleteUser)
 		apiRoutes.DELETE("/admin/listings/:id", handlers.AdminDeleteListing)
+		authRoutes.POST("/logout", handlers.LogoutUser) // <-- Add this!
 	}
 	log.Println("Starting CampusBay backend on port 8080...")
 	if err := router.Run(":8081"); err != nil {

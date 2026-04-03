@@ -1,5 +1,5 @@
 "use client";
-
+import LogoutButton from "@/components/logout-button";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import WalletWidget from "@/components/wallet-widgets"; // <-- Fixed typo here!
@@ -84,6 +84,7 @@ export default function DashboardPage() {
                 <span className="text-indigo-700 font-bold">JD</span>
               </div>
             </Link>
+            <LogoutButton />
           </div>
         </div>
       </nav>
