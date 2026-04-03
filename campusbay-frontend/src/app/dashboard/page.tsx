@@ -42,7 +42,7 @@ export default function DashboardPage() {
   }, [searchQuery, allListings]);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900 selection:bg-indigo-200">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-slate-50 to-purple-100 font-sans text-slate-900 selection:bg-indigo-200">
       
       {/* 1. Glassmorphism Navigation Bar */}
       <nav className="bg-white/70 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50 shadow-sm transition-all">
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                   style={{ animationDelay: `${(index % 4) * 100}ms` }} // Staggered entrance
                 >
                   {/* Floating Card Animation */}
-                  <div className="group bg-white border border-slate-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full">
+                  <div className="group bg-white/60 backdrop-blur-lg border border-white/40 rounded-[2rem] overflow-hidden hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full shadow-lg shadow-slate-200/50">
                     
                     {/* Image Section */}
                     <div className="h-56 w-full bg-slate-100 relative overflow-hidden">

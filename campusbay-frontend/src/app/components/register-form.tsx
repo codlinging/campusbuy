@@ -5,16 +5,8 @@ import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
-  const [status, setStatus] = useState<{ type: "idle" | "loading" | "error" | "success"; message: string }>({
-    type: "idle",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", password: "" });
+  const [status, setStatus] = useState<{ type: "idle" | "loading" | "error" | "success"; message: string }>({ type: "idle", message: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,36 +14,19 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus({ type: "loading", message: "Creating your account..." });
-
-    // Client-side .edu check
-    if (!formData.email.endsWith(".edu")) {
-      setStatus({ type: "error", message: "A valid .edu email address is required." });
-      return;
-    }
+    setStatus({ type: "loading", message: "Creating account..." });
 
     try {
-      const response = await fetch("http://localhost:8081/api/v1/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-        }),
+      const response = await fetch(`http://${window.location.hostname}:8081/api/v1/auth/register`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Registration failed");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
-      }
-
-      setStatus({ type: "success", message: data.message });
-      // Optional: router.push("/verify-email") 
+      setStatus({ type: "success", message: "Account created! Please log in." });
+      setTimeout(() => router.push("/login"), 1500);
     } catch (error: any) {
       setStatus({ type: "error", message: error.message });
     }
@@ -60,71 +35,40 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="firstName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">First name</label>
-          <input
-            id="firstName"
-            name="firstName"
-            type="text"
-            required
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-            placeholder="Jane"
-            onChange={handleChange}
-          />
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">First Name</label>
+          <input name="first_name" required placeholder="Jane" onChange={handleChange} className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900" />
         </div>
-        <div className="space-y-2">
-          <label htmlFor="lastName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Last name</label>
-          <input
-            id="lastName"
-            name="lastName"
-            type="text"
-            required
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-            placeholder="Doe"
-            onChange={handleChange}
-          />
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">Last Name</label>
+          <input name="last_name" required placeholder="Doe" onChange={handleChange} className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900" />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">University Email (.edu)</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-          placeholder="student@university.edu"
-          onChange={handleChange}
-        />
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">University Email (.edu)</label>
+        <div className="relative">
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">✉️</span>
+          <input name="email" type="email" required placeholder="student@university.edu" onChange={handleChange} className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900" />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          minLength={8}
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-          onChange={handleChange}
-        />
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">Password</label>
+        <div className="relative">
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">🔒</span>
+          <input name="password" type="password" required minLength={8} placeholder="••••••••" onChange={handleChange} className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900" />
+        </div>
       </div>
 
-      {status.type === "error" && (
-        <div className="text-sm text-red-500 font-medium">{status.message}</div>
-      )}
-      {status.type === "success" && (
-        <div className="text-sm text-green-600 font-medium">{status.message}</div>
-      )}
+      {status.type === "error" && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm font-bold animate-fade-up">{status.message}</div>}
+      {status.type === "success" && <div className="p-3 bg-green-50 text-green-700 rounded-xl text-sm font-bold animate-fade-up">{status.message}</div>}
 
-      <button
-        type="submit"
-        disabled={status.type === "loading"}
-        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 w-full"
-      >
-        {status.type === "loading" ? "Registering..." : "Join CampusBay"}
+      <button type="submit" disabled={status.type === "loading"} className="relative w-full h-12 inline-flex overflow-hidden rounded-xl p-[2px] hover:scale-[1.02] transition-transform duration-300 shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:hover:scale-100 mt-4">
+        <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+        <span className="inline-flex h-full w-full items-center justify-center rounded-xl bg-indigo-600 px-5 text-sm font-black text-white backdrop-blur-3xl uppercase tracking-wider">
+          {status.type === "loading" ? "Creating..." : "Join CampusBay"}
+        </span>
       </button>
     </form>
   );
