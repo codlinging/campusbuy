@@ -108,11 +108,15 @@ const [myUserId, setMyUserId] = useState<string>("");
             </div>
           ) : (
             messages.map((msg, index) => {
-              const isMe = msg.sender_id === myUserId;
+              // Ensure myUserId is set before checking!
+              const isMe = myUserId && msg.sender_id === myUserId;
+              
               return (
                 <div key={index} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] px-4 py-3 rounded-2xl ${
-                    isMe ? "bg-indigo-600 text-white rounded-tr-none" : "bg-white border border-slate-200 text-slate-900 rounded-tl-none shadow-sm"
+                  <div className={`max-w-[75%] px-4 py-3 ${
+                    isMe 
+                      ? "bg-indigo-600 text-white rounded-3xl rounded-tr-sm shadow-sm" // MY messages (Right, Blue)
+                      : "bg-white border border-slate-200 text-slate-900 rounded-3xl rounded-tl-sm shadow-sm" // THEIR messages (Left, Gray)
                   }`}>
                     <p className="text-sm md:text-base">{msg.content}</p>
                   </div>
@@ -120,7 +124,7 @@ const [myUserId, setMyUserId] = useState<string>("");
               );
             })
           )}
-          <div ref={messagesEndRef} /> {/* Invisible div to scroll to */}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}

@@ -6,7 +6,8 @@ import Link from "next/link";
 import WalletWidget from "@/components/wallet-widgets"; // <-- Imported the wallet!
 
 interface Listing {
-  id: string; title: string; description: string; current_price: number; image_url?: string;
+  id: string; title: string; description: string; current_price: number; image_url?: string; seller_name?: string;  created_at: string; 
+  expires_at: string;
 }
 
 export default function LiveAuctionPage() {
@@ -131,26 +132,54 @@ export default function LiveAuctionPage() {
             </div>
 
             {/* Right Column: Auction Details & Bidding */}
-            <div className="md:w-1/2 p-8 flex flex-col">
-              <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{listing.title}</h1>
-              <p className="text-slate-500 mb-6 flex-grow">{listing.description}</p>
-              
-              <div className="mb-8">
-                <Link 
-                  href={`/chat/chat-${listingId}`} 
-                  className="inline-flex items-center justify-center w-full bg-white border-2 border-slate-200 text-slate-700 h-12 rounded-xl font-bold hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
-                >
-                  💬 Message Seller
-                </Link>
+            {/* Right Column: Auction Details & Bidding */}
+          <div className="md:w-1/2 p-8 flex flex-col">
+            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{listing.title}</h1>
+            
+            {/* NEW: Seller Name Badge */}
+            <div className="flex items-center gap-2 mb-6 text-sm text-slate-500 font-medium">
+              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs">
+                {listing.seller_name ? listing.seller_name.charAt(0) : "S"}
               </div>
+              Sold by <span className="text-slate-900 font-bold">{listing.seller_name || "CampusBay Student"}</span>
+            </div>
 
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-6">
-                <p className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Current Highest Bid</p>
-                <p className="text-5xl font-black text-green-600 transition-all duration-300 transform">
-                  ${currentPrice.toFixed(2)}
-                </p>
-              </div>
+            <p className="text-slate-500 mb-6 flex-grow">{listing.description}</p>
+            
+            <div className="mb-8">
+              <Link 
+                href={`/chat/chat-${listingId}`} 
+                className="inline-flex items-center justify-center w-full bg-white border-2 border-slate-200 text-slate-700 h-12 rounded-xl font-bold hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+              >
+                💬 Message Seller
+              </Link>
+            </div>
 
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-6">
+              <p className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">
+                {/* Dynamic Label */}
+                {(new Date(listing.expires_at).getTime() - new Date(listing.created_at).getTime()) / (1000 * 60 * 60) >= 167 ? "Asking Price" : "Current Highest Bid"}
+              </p>
+              <p className="text-5xl font-black text-green-600 transition-all duration-300 transform">
+                ${currentPrice.toFixed(2)}
+              </p>
+            </div>
+
+            {/* DYNAMIC UI: Fixed Price vs Auction */}
+            {(new Date(listing.expires_at).getTime() - new Date(listing.created_at).getTime()) / (1000 * 60 * 60) >= 167 ? (
+              // FIXED PRICE UI
+              <button 
+                onClick={(e) => {
+                  setBidAmount(currentPrice.toString()); // Force the bid to be exact asking price
+                  handlePlaceBid(e);
+                }}
+                disabled={wsStatus !== "connected"}
+                className="w-full bg-green-600 text-white h-14 rounded-xl font-bold text-lg hover:bg-green-700 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                Buy Now for ${currentPrice.toFixed(2)}
+              </button>
+            ) : (
+              // LIVE AUCTION UI
               <form onSubmit={handlePlaceBid} className="flex gap-3">
                 <div className="relative flex-grow">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -174,8 +203,8 @@ export default function LiveAuctionPage() {
                   Place Bid
                 </button>
               </form>
-            </div>
-            
+            )}
+          </div>
           </div>
         </div>
       </div>

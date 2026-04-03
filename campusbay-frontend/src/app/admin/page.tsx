@@ -18,9 +18,13 @@ export default function AdminDashboard() {
         if (res.ok) setStats(await res.json());
 
         // Fetch Users
+       // Fetch Users (Safe mapping)
         res = await fetch(`http://${window.location.hostname}:8081/api/v1/admin/users`, { credentials: "include" });
-        if (res.ok) setUsers(await res.json());
-
+        if (res.ok) {
+          const userData = await res.json();
+          // Ensure we are setting an array, even if the backend sends null or an object wrapper
+          setUsers(Array.isArray(userData) ? userData : (userData.users || []));
+        }
         // Fetch Listings (Reusing your existing endpoint, but viewing as Admin)
         res = await fetch(`http://${window.location.hostname}:8081/api/v1/listings`, { credentials: "include" });
         if (res.ok) setListings(await res.json());

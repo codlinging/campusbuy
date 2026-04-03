@@ -17,6 +17,7 @@ func CreateListing(ctx context.Context, listing *models.Listing) error {
 		ctx,
 		query,
 		listing.SellerID,
+
 		listing.Title,
 		listing.Description,
 		listing.StartingPrice,
@@ -29,16 +30,21 @@ func CreateListing(ctx context.Context, listing *models.Listing) error {
 }
 
 // GetListingByID fetches a single item for the auction page
+// Replace your existing GetListingByID with this:
 func GetListingByID(ctx context.Context, id string) (*models.Listing, error) {
 	var l models.Listing
+	// We use a JOIN here to grab the seller's first and last name from the users table!
 	query := `
-		SELECT id, seller_id, title, description, starting_price, current_price, status, image_url, created_at, expires_at 
-		FROM listings 
-		WHERE id = $1
+		SELECT l.id, l.seller_id, u.first_name || ' ' || u.last_name as seller_name, 
+		       l.title, l.description, l.starting_price, l.current_price, 
+		       l.status, l.image_url, l.created_at, l.expires_at 
+		FROM listings l
+		JOIN users u ON l.seller_id = u.id
+		WHERE l.id = $1
 	`
 
 	err := DB.QueryRow(ctx, query, id).Scan(
-		&l.ID, &l.SellerID, &l.Title, &l.Description,
+		&l.ID, &l.SellerID, &l.SellerName, &l.Title, &l.Description,
 		&l.StartingPrice, &l.CurrentPrice, &l.Status,
 		&l.ImageURL, &l.CreatedAt, &l.ExpiresAt,
 	)
