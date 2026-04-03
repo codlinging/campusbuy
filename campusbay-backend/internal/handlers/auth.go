@@ -24,8 +24,6 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// ... (Keep the RegisterInput struct from earlier) ...
-
 func RegisterUser(c *gin.Context) {
 	var input RegisterInput
 

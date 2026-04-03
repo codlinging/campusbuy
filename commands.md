@@ -38,3 +38,5 @@ If you are testing on your phone, remember that you need your laptop's Local IP 
 * Type `http://192.168.1.15:3000` into your phone's mobile browser to test the web view, and make sure your Expo app's `API_URL` uses that same IP!
 
 Let me know once you've fired everything up and tested the live bidding and chat. Are you ready to move into Phase 4 to secure those WebSockets with your JWTs?
+
+docker start campusbay-redis for now on 
