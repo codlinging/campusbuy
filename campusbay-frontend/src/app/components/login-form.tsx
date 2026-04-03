@@ -5,14 +5,8 @@ import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [status, setStatus] = useState<{ type: "idle" | "loading" | "error" | "success"; message: string }>({
-    type: "idle",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [status, setStatus] = useState<{ type: "idle" | "loading" | "error" | "success"; message: string }>({ type: "idle", message: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,31 +17,17 @@ export default function LoginForm() {
     setStatus({ type: "loading", message: "Authenticating..." });
 
     try {
-      // Note: If you changed your Go port to 8081 in the last step, update this URL!
-      const response = await fetch("http://localhost:8081/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // REQUIRED to receive the HttpOnly cookie
+      const response = await fetch(`http://${window.location.hostname}:8081/api/v1/auth/login`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Login failed");
 
       setStatus({ type: "success", message: "Welcome back!" });
-      
-      // NEW: Intelligent Redirection based on Role!
       setTimeout(() => {
-        if (data.user.role === "admin") {
-          router.push("/admin"); // Take the boss to the command center
-        } else {
-          router.push("/dashboard"); // Take students to the marketplace
-        }
+        if (data.user.role === "admin") router.push("/admin");
+        else router.push("/dashboard");
       }, 1000);
     } catch (error: any) {
       setStatus({ type: "error", message: error.message });
@@ -55,45 +35,40 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">University Email</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-          placeholder="student@university.edu"
-          onChange={handleChange}
-        />
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">University Email</label>
+        <div className="relative">
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">✉️</span>
+          <input
+            name="email" type="email" required placeholder="student@university.edu" onChange={handleChange}
+            className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900"
+          />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-          onChange={handleChange}
-        />
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Password</label>
+        <div className="relative">
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">🔒</span>
+          <input
+            name="password" type="password" required placeholder="••••••••" onChange={handleChange}
+            className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900"
+          />
+        </div>
       </div>
 
-      {status.type === "error" && (
-        <div className="text-sm text-red-500 font-medium">{status.message}</div>
-      )}
-      {status.type === "success" && (
-        <div className="text-sm text-green-600 font-medium">{status.message}</div>
-      )}
+      {status.type === "error" && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm font-bold animate-fade-up">{status.message}</div>}
+      {status.type === "success" && <div className="p-3 bg-green-50 text-green-700 rounded-xl text-sm font-bold animate-fade-up">{status.message}</div>}
 
       <button
-        type="submit"
-        disabled={status.type === "loading"}
-        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 w-full"
+        type="submit" disabled={status.type === "loading"}
+        className="relative w-full h-12 inline-flex overflow-hidden rounded-xl p-[2px] hover:scale-[1.02] transition-transform duration-300 shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:hover:scale-100 mt-4"
       >
-        {status.type === "loading" ? "Logging in..." : "Log in"}
+        <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+        <span className="inline-flex h-full w-full items-center justify-center rounded-xl bg-indigo-600 px-5 text-sm font-black text-white backdrop-blur-3xl uppercase tracking-wider">
+          {status.type === "loading" ? "Logging in..." : "Log in to CampusBay"}
+        </span>
       </button>
     </form>
   );
